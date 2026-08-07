@@ -61,13 +61,13 @@ const Login = () => {
 
 return(
     <>
-        <div className="Login flex justify-center items-center h-svh">
+        <div className="Login flex justify-center items-center md:h-svh my-10 p-5 md:my-0">
             <div className="containerMain">
                 <div className="Login-main w-full flex flex-col justify-center items-center">
                     <div className="Login-head mb-10">
                         <h2 className="text-3xl text-center text-red-500 font-bold">Login</h2>
                     </div>
-                    <form action="" className="w-full md:w-125 shadow-[inset_0_5px_10px_rgba(136,136,136,0.2)] p-10 rounded-3xl">
+                    <form action="" className="w-full p-5 md:w-125 shadow-[inset_0_5px_10px_rgba(136,136,136,0.2)] md:p-10 rounded-3xl">
                         <div className="Login-email flex flex-row items-center justify-between mt-5">
                             <label htmlFor="login-email">Email</label>
                             <input 
