@@ -18,8 +18,14 @@ const InvoiceLayout = (({invoice} : props) => {
     <>
         <div className="Invoice-Main">
             <div className="containerMain">
-                <div className="Invoice-page w-full bg-white text-black" style={{height:"297mm",width: "210mm" }}>
-                    <div className="w-full rounded flex flex-col items-center justify-center p-2">
+                <div
+                    className="Invoice-page w-full bg-white text-black flex flex-col"
+                    style={{ height: "297mm", width: "210mm", boxSizing: "border-box" }}
+                >
+                    <div
+                        className="w-full flex flex-col items-center p-2"
+                        style={{ flex: "1 1 auto", minHeight: 0, boxSizing: "border-box" }}
+                    >
                         {/* Invoice Header */}
                         <div className="flex w-full justify-between">
                             <div className=" Firm-logo w-full flex justify-center items-center flex-1/4">
@@ -52,7 +58,10 @@ const InvoiceLayout = (({invoice} : props) => {
                             <p className='uppercase text-sm font-bold'>GSTIN : 24AMQBPB1171R1ZQ</p>
                         </div>
                         {/* Invoice Body starts  */}
-                        <div className="Invoice-body w-full">
+                        <div
+                            className="Invoice-body w-full flex flex-col"
+                            style={{ flex: "1 1 auto", minHeight: 0 }}
+                        >
                             <div className="Invoice-top-details grid grid-cols-2 divide-x-2 border-2 w-full">
                                 <div className="Invoice-top-left p-1">
                                         <div className="Invoice-No">
@@ -136,8 +145,11 @@ const InvoiceLayout = (({invoice} : props) => {
 
                             {/* Invoice Item Details */}
 
-                            <div className="Invoice-Items w-full border-2 border-t-0">
-                                <table className='w-full' style={{ height:"105mm" }}>
+                            <div
+                                className="Invoice-Items w-full border-2 border-t-0"
+                                style={{ flex: "1 1 auto", minHeight: 0, overflow: "hidden" }}
+                            >
+                                <table className='w-full' style={{ height: "100%" }}>
                                     <colgroup>
                                         <col style={{ width: "5%" }} />   
                                         <col style={{ width: "45%" }} />  
@@ -159,12 +171,12 @@ const InvoiceLayout = (({invoice} : props) => {
                                     <tbody className='text-center uppercase text-sm'>
                                         {invoice.invoiceItems.map((item, index) => (
                                         <tr key={index} className='divide-x-2'>
-                                            <td /*style={{ height: "100mm" }} */className='align-top'>{index+1}</td>
-                                            <td /*style={{ height: "100mm" }} */ className='text-left px-1 align-top'>{item.itemPerticular}</td>
-                                            <td /*style={{ height: "100mm" }} */className='align-top'>520811</td>
-                                            <td /*style={{ height: "100mm" }} */className='align-top'>{item.itemPieces}</td>
-                                            <td /*style={{ height: "100mm" }} */className='align-top'>{item.itemPrice}</td>
-                                            <td /*style={{ height: "100mm" }} */className='align-top'>{item.total}</td>
+                                            <td className='align-top'>{index+1}</td>
+                                            <td className='text-left px-1 align-top'>{item.itemPerticular}</td>
+                                            <td className='align-top'>520811</td>
+                                            <td className='align-top'>{item.itemPieces}</td>
+                                            <td className='align-top'>{item.itemPrice}</td>
+                                            <td className='align-top'>{item.total}</td>
                                         </tr>
                                         ))}
                                         {Array.from({ length: emptyRows }).map((_, index) => (
@@ -195,7 +207,7 @@ const InvoiceLayout = (({invoice} : props) => {
                             </div>
 
                             {/* Invoice Other Details  */}
-                            <div className="Invoice-other grid grid-cols-5 w-full">
+                            <div className="Invoice-other grid grid-cols-5 w-full" style={{ flex: "0 0 auto" }}>
                                 <div className="Invoice-other-left col-span-3">
                                     <div className="Invoice-other-amount border-2 border-t-0">
                                         <h2 className='text-sm font-bold text-center border-b-2 p-1'>Total Invoice Amount in Words</h2>

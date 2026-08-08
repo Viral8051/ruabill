@@ -459,7 +459,7 @@ useEffect(() => {
                                             id="Clinet-s-Adress" 
                                             className='bg-white ml-2 rounded-2xl text-black focus-within:outline-0 p-1 '
                                             value={invoice.invoiceClient.shippedTo.clientAdress}
-                                            onChange={(e) => handleInput('invoiceClient', 'billedTo', 'clientAdress', e.target.value)}
+                                            onChange={(e) => handleInput('invoiceClient', 'shippedTo', 'clientAdress', e.target.value)}
                                         />
                                     </div>
                                     <div className="Clinet-s-city pt-2">
