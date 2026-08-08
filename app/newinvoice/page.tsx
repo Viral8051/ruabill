@@ -18,6 +18,7 @@ type Invoice = {
     invoiceClient : {
         billedTo: {
             clientName : string,
+            clientAdress : string,
             clientCity: string,
             clientPincode: string,
             clientState: string,
@@ -25,6 +26,7 @@ type Invoice = {
         },
         shippedTo: {
             clientName : string,
+            clientAdress : string,
             clientCity: string,
             clientPincode: string,
             clientState: string,
@@ -58,6 +60,7 @@ const NewInvoice = () => {
     invoiceClient : {
         billedTo: {
             clientName : '',
+            clientAdress : '',
             clientCity: '',
             clientPincode: '',
             clientState: '',
@@ -65,6 +68,7 @@ const NewInvoice = () => {
         },
         shippedTo: {
             clientName : '',
+            clientAdress : '',
             clientCity: '',
             clientPincode: '',
             clientState: '',
@@ -223,6 +227,7 @@ const NewInvoice = () => {
                 invoiceClient : {
                     billedTo: {
                         clientName : '',
+                        clientAdress : '',
                         clientCity: '',
                         clientPincode: '',
                         clientState: '',
@@ -230,6 +235,7 @@ const NewInvoice = () => {
                     },
                     shippedTo: {
                         clientName : '',
+                        clientAdress : '',
                         clientCity: '',
                         clientPincode: '',
                         clientState: '',
@@ -371,6 +377,17 @@ useEffect(() => {
                                             onChange={(e) => handleInput('invoiceClient', 'billedTo', 'clientName', e.target.value)}
                                         />
                                     </div>
+                                    <div className="Clinet-Adress pt-2">
+                                        <label htmlFor="Clinet-Adress">Client Address:</label>
+                                        <input 
+                                            type='text'
+                                            name="Clinet-Adress" 
+                                            id="Clinet-Adress" 
+                                            className='bg-white ml-2 rounded-2xl text-black focus-within:outline-0 p-1 '
+                                            value={invoice.invoiceClient.billedTo.clientAdress}
+                                            onChange={(e) => handleInput('invoiceClient', 'billedTo', 'clientCity', e.target.value)}
+                                        />
+                                    </div>
                                     <div className="Clinet-city pt-2">
                                         <label htmlFor="Clinet-city">Client City:</label>
                                         <input 
@@ -432,6 +449,17 @@ useEffect(() => {
                                             className='bg-white ml-2 rounded-2xl text-black focus-within:outline-0 p-1 '
                                             value={invoice.invoiceClient.shippedTo.clientName}
                                             onChange={(e) => handleInput('invoiceClient', 'shippedTo', 'clientName', e.target.value)}
+                                        />
+                                    </div>
+                                    <div className="Clinet-s-Adress pt-2">
+                                        <label htmlFor="Clinet-s-Adress">Client Address:</label>
+                                        <input 
+                                            type='text'
+                                            name="Clinet-s-Adress" 
+                                            id="Clinet-s-Adress" 
+                                            className='bg-white ml-2 rounded-2xl text-black focus-within:outline-0 p-1 '
+                                            value={invoice.invoiceClient.shippedTo.clientAdress}
+                                            onChange={(e) => handleInput('invoiceClient', 'shippedTo', 'clientCity', e.target.value)}
                                         />
                                     </div>
                                     <div className="Clinet-s-city pt-2">

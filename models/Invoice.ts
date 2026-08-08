@@ -21,6 +21,7 @@ const InvoiceSchema  = new mongoose.Schema({
     invoiceClient : {
         billedTo: {
             clientName : String,
+            clientAdress : String,
             clientCity: String,
             clientPincode: String,
             clientState: String,
@@ -28,6 +29,7 @@ const InvoiceSchema  = new mongoose.Schema({
         },
         shippedTo: {
             clientName : String,
+            clientAdress : String,
             clientCity: String,
             clientPincode: String,
             clientState: String,

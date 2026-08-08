@@ -18,6 +18,7 @@ export type Invoice  = {
     invoiceClient : {
         billedTo: {
             clientName : string,
+            clientAdress : string,
             clientCity: string,
             clientPincode: string,
             clientState: string,
@@ -26,6 +27,7 @@ export type Invoice  = {
         shippedTo: {
             clientName : string,
             clientCity: string,
+            clientAdress : string,
             clientPincode: string,
             clientState: string,
             clientGst: string,

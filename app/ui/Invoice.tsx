@@ -91,6 +91,9 @@ const InvoiceLayout = (({invoice} : props) => {
                                         <h2 className='bg-red-400 mt-1 pt-1'>{invoice.invoiceClient.billedTo.clientName}</h2>    
                                     </div>
                                     <div className="Recevier-address grid grid-cols-2 font-bold text-sm pt-2">
+                                        <div className="Recevier-Adress">
+                                            <p>Address: {invoice.invoiceClient.billedTo.clientAdress}</p>
+                                        </div>
                                         <div className="Recevier-city">
                                             <p>City: {invoice.invoiceClient.billedTo.clientCity}</p>
                                         </div>
@@ -112,6 +115,9 @@ const InvoiceLayout = (({invoice} : props) => {
                                         <h2 className='bg-red-400 mt-1 pt-1'>{invoice.invoiceClient.shippedTo.clientName}</h2>    
                                     </div>
                                     <div className="Consignee-address grid grid-cols-2 font-bold text-sm pt-2">
+                                        <div className="Consignee-Adress">
+                                            <p>Address: {invoice.invoiceClient.shippedTo.clientAdress}</p>
+                                        </div>
                                         <div className="Consignee-city">
                                             <p>City: {invoice.invoiceClient.shippedTo.clientCity}</p>
                                         </div>
