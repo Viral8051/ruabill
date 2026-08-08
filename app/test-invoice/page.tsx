@@ -1,3 +1,4 @@
+"use client";
 import InvoiceLayout from "../ui/Invoice";
 import { Invoice } from "@/context/invoice/invoiceReducer";
 
@@ -15,6 +16,7 @@ const dummyInvoice: Invoice = {
   invoiceClient: {
     billedTo: {
       clientName: "Test Client Pvt Ltd",
+      clientAdress: "A-1, Ground Floor, Sumel Buisness Park - 2, B/H. Vanijya Bhavan, Kankariya road",
       clientCity: "Jamnagar",
       clientPincode: "361001",
       clientState: "Gujarat",
@@ -22,6 +24,7 @@ const dummyInvoice: Invoice = {
     },
     shippedTo: {
       clientName: "Test Client Pvt Ltd",
+      clientAdress: "A-1, Ground Floor, Sumel Buisness Park - 2, B/H. Vanijya Bhavan, Kankariya road",
       clientCity: "Jamnagar",
       clientPincode: "361001",
       clientState: "Gujarat",

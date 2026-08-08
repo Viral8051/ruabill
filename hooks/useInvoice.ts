@@ -15,14 +15,16 @@ export function  useInvoice() {
     }
 
     async function deleteInvoice(invoiceNo : string){
-        const res = await fetch(`/api/invoices/${invoiceNo}`,{
-            method : "DELETE",
-        });
-        if(!res.ok){
-            throw new Error("Failed to delete Invoice");
-        }
-        dispatch({type: "DELETE", payload: invoiceNo});
+    const res = await fetch(`/api/invoices/${invoiceNo}`,{
+        method : "DELETE",
+    });
+    if(!res.ok){
+        const data = await res.json().catch(() => null);
+        console.error("Delete failed:", res.status, data);
+        throw new Error(data?.message || `Failed to delete Invoice (status ${res.status})`);
     }
+    dispatch({type: "DELETE", payload: invoiceNo});
+}
     return{
         invoices: state.invoices,
         addInvoice,

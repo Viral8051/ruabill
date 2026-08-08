@@ -1,279 +1,981 @@
-import { Invoice } from '@/context/invoice/invoiceReducer'
-import React, {forwardRef} from 'react'
+"use client";
+import { Invoice } from '@/context/invoice/invoiceReducer';
+import React, { useEffect, useRef, useState } from 'react';
 
-type props  = {
-    invoice:Invoice
-}
+type props = {
+    invoice: Invoice
+};
 
-const InvoiceLayout = (({invoice} : props) => {
+const numberToWords = (num: number): string => {
+    const ones = [
+        "",
+        "One",
+        "Two",
+        "Three",
+        "Four",
+        "Five",
+        "Six",
+        "Seven",
+        "Eight",
+        "Nine",
+        "Ten",
+        "Eleven",
+        "Twelve",
+        "Thirteen",
+        "Fourteen",
+        "Fifteen",
+        "Sixteen",
+        "Seventeen",
+        "Eighteen",
+        "Nineteen",
+    ];
+
+    const tens = [
+        "",
+        "",
+        "Twenty",
+        "Thirty",
+        "Forty",
+        "Fifty",
+        "Sixty",
+        "Seventy",
+        "Eighty",
+        "Ninety",
+    ];
+
+    const convert = (n: number): string => {
+        if (n < 20) {
+            return ones[n];
+        }
+
+        if (n < 100) {
+            return (
+                tens[Math.floor(n / 10)] +
+                (n % 10 ? " " + ones[n % 10] : "")
+            );
+        }
+
+        if (n < 1000) {
+            return (
+                ones[Math.floor(n / 100)] +
+                " Hundred" +
+                (n % 100 ? " " + convert(n % 100) : "")
+            );
+        }
+
+        if (n < 100000) {
+            return (
+                convert(Math.floor(n / 1000)) +
+                " Thousand" +
+                (n % 1000 ? " " + convert(n % 1000) : "")
+            );
+        }
+
+        if (n < 10000000) {
+            return (
+                convert(Math.floor(n / 100000)) +
+                " Lakh" +
+                (n % 100000 ? " " + convert(n % 100000) : "")
+            );
+        }
+
+        return (
+            convert(Math.floor(n / 10000000)) +
+            " Crore" +
+            (n % 10000000
+                ? " " + convert(n % 10000000)
+                : "")
+        );
+    };
+
+    if (num === 0) {
+        return "Zero";
+    }
+
+    return convert(Math.floor(num));
+};
+
+const InvoiceLayout = ({ invoice }: props) => {
+
+    const invoiceContentRef = useRef<HTMLDivElement>(null);
+
+    /*
+      Scale used only for printing.
+
+      1 = normal size
+      Less than 1 = automatically shrink invoice
+      so the complete invoice fits inside A4.
+    */
+    const [printScale, setPrintScale] = useState(1);
+
     const max_rows = 10;
-    const emptyRows = max_rows - invoice.invoiceItems.length;
 
-    // gst
-    const totalAmount = invoice.invoiceItems.reduce((sum, item) => sum + item.total,0);
-    const cgst = Math.round ((totalAmount * 2.5) / 100);
-    const sgst = Math.round ((totalAmount * 2.5) / 100);
-    const netAmount = totalAmount + cgst +sgst;
-  return (
-    <>
-        <div className="Invoice-Main">
-            <div className="containerMain">
-                <div
-                    className="Invoice-page w-full bg-white text-black flex flex-col"
-                    style={{ height: "297mm", width: "210mm", boxSizing: "border-box" }}
-                >
+    const emptyRows = Math.max(
+        0,
+        max_rows - invoice.invoiceItems.length
+    );
+
+    // GST
+    const totalAmount = invoice.invoiceItems.reduce(
+        (sum, item) => sum + item.total,
+        0
+    );
+
+    const cgst = Math.round(
+        (totalAmount * 2.5) / 100
+    );
+
+    const sgst = Math.round(
+        (totalAmount * 2.5) / 100
+    );
+
+    const netAmount =
+        totalAmount +
+        cgst +
+        sgst;
+
+
+    const amountInWords = numberToWords(netAmount);
+    /*
+      Calculate how much the invoice needs to shrink
+      to fit inside the 297mm A4 height.
+
+      CSS uses 96px per inch.
+      1mm = 3.779527559px.
+    */
+    useEffect(() => {
+
+        const calculateScale = () => {
+
+            const element =
+                invoiceContentRef.current;
+
+            if (!element) {
+                return;
+            }
+
+            const A4_HEIGHT_PX =
+                297 * 3.779527559;
+
+            const contentHeight =
+                element.scrollHeight;
+
+            if (contentHeight <= A4_HEIGHT_PX) {
+
+                setPrintScale(1);
+
+                return;
+            }
+
+            const scale =
+                A4_HEIGHT_PX /
+                contentHeight;
+
+            /*
+              Don't allow the invoice to become
+              ridiculously tiny.
+            */
+            setPrintScale(
+                Math.max(
+                    Math.min(scale, 1),
+                    0.65
+                )
+            );
+        };
+
+
+        calculateScale();
+
+        /*
+          Images/fonts may change the actual
+          invoice height after initial render.
+        */
+        const timer = setTimeout(
+            calculateScale,
+            300
+        );
+
+        window.addEventListener(
+            "resize",
+            calculateScale
+        );
+
+        return () => {
+
+            clearTimeout(timer);
+
+            window.removeEventListener(
+                "resize",
+                calculateScale
+            );
+
+        };
+
+    }, [invoice]);
+
+
+    return (
+        <>
+            <div className="Invoice-Main">
+
+                <div className="containerMain">
+
                     <div
-                        className="w-full flex flex-col items-center p-2"
-                        style={{ flex: "1 1 auto", minHeight: 0, boxSizing: "border-box" }}
+                        className="Invoice-page w-full bg-white text-black"
+                        style={{
+                            width: "210mm",
+                            height: "297mm",
+                            boxSizing: "border-box",
+                            overflow: "hidden",
+                        }}
                     >
-                        {/* Invoice Header */}
-                        <div className="flex w-full justify-between">
-                            <div className=" Firm-logo w-full flex justify-center items-center flex-1/4">
-                                <div className="">
-                                    <img src="/CT-Logo.png" alt="CT Logo" />
-                                </div>
-                            </div>
-                            <div className="w-full flex-2/4">
-                                <div className="Lord-greetings w-full">
-                                    <h2 className='text-red-600 text-sm pb-1 text-center'>||| Shree Aashapura Maa |||</h2>
-                                </div>
-                                <div className="Firm-Name w-full">
-                                    <h1 className='text-center font-semibold text-4xl text-red-600 uppercase'>Charmi Traders</h1>
-                                </div>
-                                <div className="Firm-Adress w-full py-2">
-                                    <p className='text-center font-bold text-sm'>Laxmi Nivas, Opp. Raghuvir Mandap Services,<br /> Near Sodha School, Ramvadi, Gulabnagar, Jamnagar, 361007.</p>
-                                </div>
-                            </div>
-                            <div className="Firm-contact w-full flex justify-center items-center flex-1/4">
-                                <div className="Firm-number">
-                                    <p className='font-bold text-[12px]'><strong>Vinubhai Bhoot :</strong> 9824206710</p>
-                                    <p className='font-bold text-[12px]' ><strong>Viral Bhoot :</strong> 9722930053</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="Invoice-title bg-blue-300 w-full text-center p-1">
-                            <p className='font-bold text-sm uppercase'>Tax Invoice</p>        
-                        </div>
-                        <div className="Invoice-gst p-1">
-                            <p className='uppercase text-sm font-bold'>GSTIN : 24AMQBPB1171R1ZQ</p>
-                        </div>
-                        {/* Invoice Body starts  */}
+
                         <div
-                            className="Invoice-body w-full flex flex-col"
-                            style={{ flex: "1 1 auto", minHeight: 0 }}
+                            ref={invoiceContentRef}
+                            className="Invoice-fit-content w-full flex flex-col items-center p-2"
+                            style={{
+                                width: "100%",
+                                boxSizing: "border-box",
+
+                                /*
+                                  CSS variable is used by print CSS.
+                                  Normal screen preview remains scale 1.
+                                */
+                                "--invoice-scale":
+                                    printScale
+                            } as React.CSSProperties}
                         >
-                            <div className="Invoice-top-details grid grid-cols-2 divide-x-2 border-2 w-full">
-                                <div className="Invoice-top-left p-1">
+
+                            {/* =====================================================
+                                INVOICE HEADER
+                            ===================================================== */}
+
+                            <div className="w-full flex flex-col items-center">
+
+                                <div className="flex w-full justify-between">
+
+                                    <div className="Firm-logo w-full flex justify-center items-center flex-1/4">
+
+                                        <div>
+                                            <img
+                                                src="/CT-Logo.png"
+                                                alt="CT Logo"
+                                            />
+                                        </div>
+
+                                    </div>
+
+
+                                    <div className="w-full flex-2/4">
+
+                                        <div className="Lord-greetings w-full">
+
+                                            <h2 className="text-[#9b2438] text-sm pb-1 text-center">
+                                                ||| Shree Aashapura Maa |||
+                                            </h2>
+
+                                        </div>
+
+
+                                        <div className="Firm-Name w-full">
+
+                                            <h1 className="text-center font-semibold text-4xl text-[#9b2438] uppercase">
+                                                Charmi Traders
+                                            </h1>
+
+                                        </div>
+
+
+                                        <div className="Firm-Adress w-full py-2">
+
+                                            <p className="text-center font-bold text-sm">
+                                                Laxmi Nivas, Opp. Raghuvir Mandap Services,
+                                                <br />
+                                                Near Sodha School, Ramvadi, Gulabnagar,
+                                                Jamnagar, 361007.
+                                            </p>
+
+                                        </div>
+
+                                    </div>
+
+
+                                    <div className="Firm-contact w-full flex justify-center items-center flex-1/4">
+
+                                        <div className="Firm-number">
+
+                                            <p className="font-bold text-[12px]">
+                                                <strong>Vinubhai Bhoot :</strong> 9824206710
+                                            </p>
+
+                                            <p className="font-bold text-[12px]">
+                                                <strong>Viral Bhoot :</strong> 9722930053
+                                            </p>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div className="Invoice-title bg-blue-300 w-full text-center p-1">
+
+                                    <p className="font-bold text-sm uppercase">
+                                        Tax Invoice
+                                    </p>
+
+                                </div>
+
+
+                                <div className="Invoice-gst p-1">
+
+                                    <p className="uppercase text-sm font-bold">
+                                        GSTIN : 24AMQBPB1171R1ZQ
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+
+                            {/* =====================================================
+                                INVOICE BODY
+                            ===================================================== */}
+
+                            <div className="Invoice-body w-full flex flex-col">
+
+
+                                {/* =================================================
+                                    TOP DETAILS
+                                ================================================= */}
+
+                                <div className="Invoice-top-details grid grid-cols-2 divide-x-2 border-2 w-full">
+
+                                    <div className="Invoice-top-left p-1">
+
                                         <div className="Invoice-No">
-                                            <p className='text-sm font-bold'>Invoice : {invoice.invoiceInfo.invoiceNo}</p>
-                                        </div>               
+
+                                            <p className="text-sm font-bold">
+                                                Invoice : {invoice.invoiceInfo.invoiceNo}
+                                            </p>
+
+                                        </div>
+
+
                                         <div className="Transport">
-                                            <p className='text-sm font-bold'>Transport : {invoice.invoiceInfo.invoiceTransport}</p>
-                                        </div>                  
+
+                                            <p className="text-sm font-bold">
+                                                Transport : {invoice.invoiceInfo.invoiceTransport}
+                                            </p>
+
+                                        </div>
+
+
                                         <div className="Lr-Number">
-                                            <p className='text-sm font-bold'>LR No :{invoice.invoiceInfo.invoiceLr}</p>
-                                        </div>         
+
+                                            <p className="text-sm font-bold">
+                                                LR No : {invoice.invoiceInfo.invoiceLr}
+                                            </p>
+
+                                        </div>
+
+
                                         <div className="Goods-sends-from">
-                                            <p className='text-sm font-bold'>Goods Send From: {invoice.invoiceInfo.invoiceSendFrom}</p>
+
+                                            <p className="text-sm font-bold">
+                                                Goods Send From: {invoice.invoiceInfo.invoiceSendFrom}
+                                            </p>
+
                                         </div>
-                                </div>  
-                                <div className="Invoice-top-right p-1">
-                                    <div className="Invoice-date">
-                                            <p className='text-sm font-bold'>Invoice Date : {invoice.invoiceInfo.invoiceDate}</p>
-                                        </div>               
+
+                                    </div>
+
+
+                                    <div className="Invoice-top-right p-1">
+
+                                        <div className="Invoice-date">
+
+                                            <p className="text-sm font-bold">
+                                                Invoice Date : {invoice.invoiceInfo.invoiceDate}
+                                            </p>
+
+                                        </div>
+
+
                                         <div className="Challan-no">
-                                            <p className='text-sm font-bold'>Challan No : {invoice.invoiceInfo.invoiceChallan}</p>
-                                        </div>                  
+
+                                            <p className="text-sm font-bold">
+                                                Challan No : {invoice.invoiceInfo.invoiceChallan}
+                                            </p>
+
+                                        </div>
+
+
                                         <div className="Date-supply">
-                                            <p className='text-sm font-bold'>Date of Supply: {invoice.invoiceInfo.invoiceSupplyDate}</p>
-                                        </div>         
+
+                                            <p className="text-sm font-bold">
+                                                Date of Supply: {invoice.invoiceInfo.invoiceSupplyDate}
+                                            </p>
+
+                                        </div>
+
+
                                         <div className="Goods-sends-to">
-                                            <p className='text-sm font-bold'>Goods Send To: {invoice.invoiceInfo.invoiceSendTo}</p>
+
+                                            <p className="text-sm font-bold">
+                                                Goods Send To: {invoice.invoiceInfo.invoiceSendTo}
+                                            </p>
+
                                         </div>
-                                </div>
-                            </div>
-                            {/* Invoice Client Details */}
-                            <div className="Invoice-client-details grid grid-cols-2 divide-x-2 border-2 border-t-0 w-full">
-                                <div className="Invoic-client-left p-1">
-                                    <div className="Detail-reciever text-center font-bold">
-                                        <h2 className='bg-blue-300'>Detail of Receiver : Billed To</h2>
-                                        <h2 className='bg-red-400 mt-1 pt-1'>{invoice.invoiceClient.billedTo.clientName}</h2>    
-                                    </div>
-                                    <div className="Recevier-address grid grid-cols-2 font-bold text-sm pt-2">
-                                        <div className="Recevier-Adress">
-                                            <p>Address: {invoice.invoiceClient.billedTo.clientAdress}</p>
-                                        </div>
-                                        <div className="Recevier-city">
-                                            <p>City: {invoice.invoiceClient.billedTo.clientCity}</p>
-                                        </div>
-                                        <div className="Recevier-pincode">
-                                            <p>Pincode: {invoice.invoiceClient.billedTo.clientPincode}</p>
-                                        </div>
-                                        <div className="Recevier-state">
-                                            <p>State: {invoice.invoiceClient.billedTo.clientState}</p>
-                                        </div>
-                                    </div>
-                                    <div className="Recevier-gst text-sm font-bold pt-2">
-                                        <p className='uppercase'>gstin : {invoice.invoiceClient.billedTo.clientGst}</p>
+
                                     </div>
 
                                 </div>
-                                <div className="Invoice-client-Right p-1">
-                                    <div className="Detail-consignee text-center font-bold">
-                                        <h2 className='bg-blue-300'>Detail of Consignee : Shipped To</h2>
-                                        <h2 className='bg-red-400 mt-1 pt-1'>{invoice.invoiceClient.shippedTo.clientName}</h2>    
-                                    </div>
-                                    <div className="Consignee-address grid grid-cols-2 font-bold text-sm pt-2">
-                                        <div className="Consignee-Adress">
-                                            <p>Address: {invoice.invoiceClient.shippedTo.clientAdress}</p>
-                                        </div>
-                                        <div className="Consignee-city">
-                                            <p>City: {invoice.invoiceClient.shippedTo.clientCity}</p>
-                                        </div>
-                                        <div className="Consignee-pincode">
-                                            <p>Pincode: {invoice.invoiceClient.shippedTo.clientPincode}</p>
-                                        </div>
-                                        <div className="Consignee-state">
-                                            <p>State: {invoice.invoiceClient.shippedTo.clientState}</p>
-                                        </div>
-                                    </div>
-                                    <div className="Consignee-gst text-sm font-bold pt-2">
-                                        <p className='uppercase'>gstin : {invoice.invoiceClient.shippedTo.clientGst}</p>
-                                    </div>
-                                </div>
-                            </div>
 
-                            {/* Invoice Item Details */}
 
-                            <div
-                                className="Invoice-Items w-full border-2 border-t-0"
-                                style={{ flex: "1 1 auto", minHeight: 0, overflow: "hidden" }}
-                            >
-                                <table className='w-full' style={{ height: "100%" }}>
-                                    <colgroup>
-                                        <col style={{ width: "5%" }} />   
-                                        <col style={{ width: "45%" }} />  
-                                        <col style={{ width: "9.9%" }} />  
-                                        <col style={{ width: "12%" }} />  
-                                        <col style={{ width: "12%" }} />  
-                                        <col style={{ width: "16.1%" }} />
-                                    </colgroup>
-                                    <thead className='bg-blue-300'>
-                                        <tr className='divide-x-2'>
-                                            <th>No</th>
-                                            <th className='text-left px-1'>Particulars</th>
-                                            <th>HSN</th>
-                                            <th>Pieces</th>
-                                            <th>Rate</th>
-                                            <th>Total</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className='text-center uppercase text-sm'>
-                                        {invoice.invoiceItems.map((item, index) => (
-                                        <tr key={index} className='divide-x-2'>
-                                            <td className='align-top'>{index+1}</td>
-                                            <td className='text-left px-1 align-top'>{item.itemPerticular}</td>
-                                            <td className='align-top'>520811</td>
-                                            <td className='align-top'>{item.itemPieces}</td>
-                                            <td className='align-top'>{item.itemPrice}</td>
-                                            <td className='align-top'>{item.total}</td>
-                                        </tr>
-                                        ))}
-                                        {Array.from({ length: emptyRows }).map((_, index) => (
-                                        <tr key={`empty-${index}`} className="divide-x-2">
-                                            <td>&nbsp;</td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                        </tr>
-                                        ))}
-                                        <tr className='border-t-2'>
-                                            <td colSpan={3} className='border-t-2 border-r-2'>total</td>
-                                            <td className='border-t-2 font-bold'>
-                                                {invoice.invoiceItems.reduce (
-                                                    (sum, item) => sum + item.itemPieces,
-                                                    0
-                                                )}
-                                            </td>
-                                            <td className='border-r-2'></td>
-                                            <td className='text-center font-bold'>
-                                                {totalAmount}
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                                {/* =================================================
+                                    CLIENT DETAILS
+                                ================================================= */}
 
-                            {/* Invoice Other Details  */}
-                            <div className="Invoice-other grid grid-cols-5 w-full" style={{ flex: "0 0 auto" }}>
-                                <div className="Invoice-other-left col-span-3">
-                                    <div className="Invoice-other-amount border-2 border-t-0">
-                                        <h2 className='text-sm font-bold text-center border-b-2 p-1'>Total Invoice Amount in Words</h2>
-                                        <p className='text-sm font-bold text-center p-1'>One Lakh fifty one thousand Rupees Only</p>
-                                    </div>
-                                    <div className="Invoice-other-bank border-2 border-t-0">
-                                        <h2 className='text-sm font-bold text-center p-1 border-b-2'>Bank Details</h2>
-                                        <div className="grid grid-cols-10 text-sm font-bold ">
-                                            <div className="Invoice-bank-left col-span-3 ">
-                                                <p className='p-1 border-b-2 border-r-2'>Bank Account</p>
-                                                <p className='p-1 border-b-2 border-r-2'>Bank Name</p>
-                                                <p className='p-1 border-r-2'>Bank IFSC</p>
+                                <div className="Invoice-client-details grid grid-cols-2 divide-x-2 border-2 border-t-0 w-full">
+
+                                    <div className="Invoic-client-left p-1">
+
+                                        <div className="Detail-reciever text-center font-bold">
+
+                                            <h2 className="bg-blue-300">
+                                                Detail of Receiver : Billed To
+                                            </h2>
+
+                                            <h2 className="bg-red-400 mt-1 pt-1">
+                                                {invoice.invoiceClient.billedTo.clientName}
+                                            </h2>
+
+                                        </div>
+
+
+                                        <div className="Recevier-address grid grid-cols-1 font-bold text-sm pt-2">
+
+                                            <div className="Recevier-Adress">
+
+                                                <p>
+                                                    Address: 
+                                                    <span className="font-light">
+                                                        {invoice.invoiceClient.billedTo.clientAdress}
+                                                    </span>
+                                                </p>
+
                                             </div>
-                                            <div className="Invoice-bank-right w-full col-span-7">
-                                                <p className='p-1 border-b-2'>006000400000247 </p>
-                                                <p className='p-1 border-b-2'>The Nawanagar Co-Operative Bank Ltd</p>
-                                                <p className='p-1'>TNCB0000006 <span className='pl-9'>Jamnagar</span></p>
+
+
+                                            <div className="Recevier-city">
+
+                                                <p>
+                                                    City: 
+                                                    <span className="font-light">
+                                                        {invoice.invoiceClient.billedTo.clientCity}
+                                                    </span>
+                                                </p>
+
                                             </div>
+
+
+                                            <div className="Recevier-pincode">
+
+                                                <p>
+                                                    Pincode: 
+                                                    <span className="font-light">
+                                                        {invoice.invoiceClient.billedTo.clientPincode}
+                                                    </span>
+                                                </p>
+
+                                            </div>
+
+
+                                            <div className="Recevier-state">
+
+                                                <p>
+                                                    State: 
+                                                    <span className="font-light">
+                                                        {invoice.invoiceClient.billedTo.clientState}
+                                                    </span>
+                                                </p>
+
+                                            </div>
+
                                         </div>
+
+
+                                        <div className="Recevier-gst text-sm font-bold pt-2">
+
+                                            <p className="uppercase">
+                                                gstin : {invoice.invoiceClient.billedTo.clientGst}
+                                            </p>
+
+                                        </div>
+
                                     </div>
-                                    <div className="Invoice-other-terms font-bold text-sm border-2 border-t-0">
-                                        <h2 className='text-center border-b-2'>Terms and Conditions</h2>
-                                        <ul className='list-disc p-1 pl-5 text-[11px]'>
-                                            <li>Goods once sold will not be taken back or exchanged.</li>
-                                            <li>Seller is not responsible for any loss or damage of goods in transit.</li>
-                                        </ul>
+
+
+                                    <div className="Invoice-client-Right p-1">
+
+                                        <div className="Detail-consignee text-center font-bold">
+
+                                            <h2 className="bg-blue-300">
+                                                Detail of Consignee : Shipped To
+                                            </h2>
+
+                                            <h2 className="bg-red-400 mt-1 pt-1">
+                                                {invoice.invoiceClient.shippedTo.clientName}
+                                            </h2>
+
+                                        </div>
+
+
+                                        <div className="Consignee-address grid grid-cols-1 font-bold text-sm pt-2">
+
+                                            <div className="Consignee-Adress">
+
+                                                <p>
+                                                    Address: 
+                                                    <span className="font-light">
+                                                        {invoice.invoiceClient.shippedTo.clientAdress}
+                                                    </span>
+                                                </p>
+
+                                            </div>
+
+
+                                            <div className="Consignee-city">
+
+                                                <p>
+                                                    City: 
+                                                    <span className="font-light">
+                                                        {invoice.invoiceClient.shippedTo.clientCity}
+                                                    </span>
+                                                </p>
+
+                                            </div>
+
+
+                                            <div className="Consignee-pincode">
+
+                                                <p>
+                                                    Pincode: 
+                                                    <span className="font-light">
+                                                        {invoice.invoiceClient.shippedTo.clientPincode}
+                                                    </span>
+                                                </p>
+
+                                            </div>
+
+
+                                            <div className="Consignee-state">
+
+                                                <p>
+                                                    State: 
+                                                    <span className="font-light">
+                                                        {invoice.invoiceClient.shippedTo.clientState}
+                                                    </span>
+                                                </p>
+
+                                            </div>
+
+                                        </div>
+
+
+                                        <div className="Consignee-gst text-sm font-bold pt-2">
+
+                                            <p className="uppercase">
+                                                gstin : {invoice.invoiceClient.shippedTo.clientGst}
+                                            </p>
+
+                                        </div>
+
                                     </div>
+
                                 </div>
-                                <div className="Invoice-other-right col-span-2">
-                                    <div className="Invoice-other-gst grid grid-cols-10 font-bold text-sm border-r-2 border-b-2">
-                                        <div className="col-span-4">
-                                            <p className='p-1 text-center border-r-2 border-b-2'>CGST</p>
-                                            <p className='p-1 text-center border-r-2'>SGST</p>
-                                        </div>
-                                        <div className="col-span-2">
-                                            <p className='p-1 text-center border-r-2 border-b-2'>2.5%</p>
-                                            <p className='p-1 text-center border-r-2 '>2.5%</p>
-                                        </div>
-                                        <div className="col-span-4">
-                                            <p className='p-1 text-center border-b-2'>{cgst}</p>
-                                            <p className='p-1 text-center'>{sgst}</p>
-                                        </div>
-                                    </div>
-                                    <div className="Invoice-other-net grid grid-cols-10 font-bold text-sm border-r-2 border-b-2">
-                                        <div className="col-span-6 text-center border-r-2">
-                                            <p className='p-1'>Net Amount</p>
-                                        </div>
-                                        <div className="col-span-4 text-center">
-                                            <p className='p-1'>{netAmount}</p>
-                                        </div>
-                                    </div>
-                                    <div className="Invoice-other-sign border-r-2 border-b-2 h-38">
-                                        <p className='text-[9px] p-2 text-center'>Certified that the particulars given above are true and correct</p>
-                                        <p className='text-center'>For <span className='text-red-500 font-bold'>Charmi Traders</span></p>
-                                        <p className='pt-18 text-center font-bold'>Authorised signatory</p>
-                                    </div>
+
+
+                                {/* =================================================
+                                    ITEM DETAILS
+                                ================================================= */}
+
+                                <div className="Invoice-Items w-full border-2 border-t-0">
+
+                                    <table className="w-full">
+
+                                        <colgroup>
+
+                                            <col style={{ width: "5%" }} />
+
+                                            <col style={{ width: "45%" }} />
+
+                                            <col style={{ width: "9.9%" }} />
+
+                                            <col style={{ width: "12%" }} />
+
+                                            <col style={{ width: "12%" }} />
+
+                                            <col style={{ width: "16.1%" }} />
+
+                                        </colgroup>
+
+
+                                        <thead className="bg-blue-300">
+
+                                            <tr className="divide-x-2">
+
+                                                <th>No</th>
+
+                                                <th className="text-left px-1">
+                                                    Particulars
+                                                </th>
+
+                                                <th>
+                                                    HSN
+                                                </th>
+
+                                                <th>
+                                                    Pieces
+                                                </th>
+
+                                                <th>
+                                                    Rate
+                                                </th>
+
+                                                <th>
+                                                    Total
+                                                </th>
+
+                                            </tr>
+
+                                        </thead>
+
+
+                                        <tbody className="text-center uppercase text-sm">
+
+                                            {invoice.invoiceItems.map(
+                                                (item, index) => (
+
+                                                    <tr
+                                                        key={index}
+                                                        className="divide-x-2"
+                                                    >
+
+                                                        <td className="align-top">
+                                                            {index + 1}
+                                                        </td>
+
+                                                        <td className="text-left px-1 align-top">
+                                                            {item.itemPerticular}
+                                                        </td>
+
+                                                        <td className="align-top">
+                                                            998821
+                                                        </td>
+
+                                                        <td className="align-top">
+                                                            {item.itemPieces}
+                                                        </td>
+
+                                                        <td className="align-top">
+                                                            {item.itemPrice}
+                                                        </td>
+
+                                                        <td className="align-top">
+                                                            {item.total}
+                                                        </td>
+
+                                                    </tr>
+
+                                                )
+                                            )}
+
+
+                                            {Array.from({
+                                                length: emptyRows
+                                            }).map(
+                                                (_, index) => (
+
+                                                    <tr
+                                                        key={`empty-${index}`}
+                                                        className="divide-x-2"
+                                                    >
+
+                                                        <td>
+                                                            &nbsp;
+                                                        </td>
+
+                                                        <td></td>
+
+                                                        <td></td>
+
+                                                        <td></td>
+
+                                                        <td></td>
+
+                                                        <td></td>
+
+                                                    </tr>
+
+                                                )
+                                            )}
+
+
+                                            <tr className="border-t-2">
+
+                                                <td
+                                                    colSpan={3}
+                                                    className="border-t-2 border-r-2"
+                                                >
+                                                    total
+                                                </td>
+
+                                                <td className="border-t-2 font-bold">
+
+                                                    {invoice.invoiceItems.reduce(
+                                                        (sum, item) =>
+                                                            sum +
+                                                            item.itemPieces,
+                                                        0
+                                                    )}
+
+                                                </td>
+
+                                                <td className="border-r-2"></td>
+
+                                                <td className="text-center font-bold">
+
+                                                    {totalAmount}
+
+                                                </td>
+
+                                            </tr>
+
+                                        </tbody>
+
+                                    </table>
+
                                 </div>
+
+
+                                {/* =================================================
+                                    OTHER DETAILS
+                                ================================================= */}
+
+                                <div
+                                    className="Invoice-other grid grid-cols-5 w-full"
+                                >
+
+                                    <div className="Invoice-other-left col-span-3">
+
+
+                                        {/* Amount in words */}
+
+                                        <div className="Invoice-other-amount border-2 border-t-0">
+
+                                            <h2 className="text-sm font-bold text-center border-b-2 p-1">
+                                                Total Invoice Amount in Words
+                                            </h2>
+
+                                            <p className="text-sm font-bold text-center p-1">
+                                                 {amountInWords} Rupees Only
+                                            </p>
+
+                                        </div>
+
+
+                                        {/* Bank details */}
+
+                                        <div className="Invoice-other-bank border-2 border-t-0">
+
+                                            <h2 className="text-sm font-bold text-center p-1 border-b-2">
+                                                Bank Details
+                                            </h2>
+
+
+                                            <div className="grid grid-cols-10 text-sm font-bold">
+
+                                                <div className="Invoice-bank-left col-span-3">
+
+                                                    <p className="p-1 border-b-2 border-r-2">
+                                                        Bank Account
+                                                    </p>
+
+                                                    <p className="p-1 border-b-2 border-r-2">
+                                                        Bank Name
+                                                    </p>
+
+                                                    <p className="p-1 border-r-2">
+                                                        Bank IFSC
+                                                    </p>
+
+                                                </div>
+
+
+                                                <div className="Invoice-bank-right w-full col-span-7">
+
+                                                    <p className="p-1 border-b-2">
+                                                        006000400000247
+                                                    </p>
+
+                                                    <p className="p-1 border-b-2">
+                                                        The Nawanagar Co-Operative Bank Ltd
+                                                    </p>
+
+                                                    <p className="p-1">
+                                                        TNCB0000006
+                                                        <span className="pl-9">
+                                                            Jamnagar
+                                                        </span>
+                                                    </p>
+
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+
+                                        {/* Terms */}
+
+                                        <div className="Invoice-other-terms font-bold text-sm border-2 border-t-0">
+
+                                            <h2 className="text-center border-b-2">
+                                                Terms and Conditions
+                                            </h2>
+
+                                            <ul className="list-disc p-1 pl-5 text-[11px]">
+
+                                                <li>
+                                                    Goods once sold will not be taken back or exchanged.
+                                                </li>
+
+                                                <li>
+                                                    Seller is not responsible for any loss or damage of goods in transit.
+                                                </li>
+
+                                            </ul>
+
+                                        </div>
+
+                                    </div>
+
+
+                                    {/* =================================================
+                                        RIGHT SIDE TOTALS / SIGNATURE
+                                    ================================================= */}
+
+                                    <div className="Invoice-other-right col-span-2">
+
+
+                                        {/* GST */}
+
+                                        <div className="Invoice-other-gst grid grid-cols-10 font-bold text-sm border-r-2 border-b-2">
+
+                                            <div className="col-span-4">
+
+                                                <p className="p-1 text-center border-r-2 border-b-2">
+                                                    CGST
+                                                </p>
+
+                                                <p className="p-1 text-center border-r-2">
+                                                    SGST
+                                                </p>
+
+                                            </div>
+
+
+                                            <div className="col-span-2">
+
+                                                <p className="p-1 text-center border-r-2 border-b-2">
+                                                    2.5%
+                                                </p>
+
+                                                <p className="p-1 text-center border-r-2">
+                                                    2.5%
+                                                </p>
+
+                                            </div>
+
+
+                                            <div className="col-span-4">
+
+                                                <p className="p-1 text-center border-b-2">
+                                                    {cgst}
+                                                </p>
+
+                                                <p className="p-1 text-center">
+                                                    {sgst}
+                                                </p>
+
+                                            </div>
+
+                                        </div>
+
+
+                                        {/* Net Amount */}
+
+                                        <div className="Invoice-other-net grid grid-cols-10 font-bold text-sm border-r-2 border-b-2">
+
+                                            <div className="col-span-6 text-center border-r-2">
+
+                                                <p className="p-1">
+                                                    Net Amount
+                                                </p>
+
+                                            </div>
+
+
+                                            <div className="col-span-4 text-center">
+
+                                                <p className="p-1">
+                                                    {netAmount}
+                                                </p>
+
+                                            </div>
+
+                                        </div>
+
+
+                                        {/* Signature */}
+
+                                        <div className="Invoice-other-sign border-r-2 border-b-2 h-38">
+
+                                            <p className="text-[9px] p-2 text-center">
+                                                Certified that the particulars given above are true and correct
+                                            </p>
+
+                                            <p className="text-center">
+                                                For{" "}
+                                                <span className="text-[#9b2438] font-bold">
+                                                    Charmi Traders
+                                                </span>
+                                            </p>
+
+                                            <p className="pt-18 text-center font-bold">
+                                                Authorised signatory
+                                            </p>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
                             </div>
+
                         </div>
+
                     </div>
 
                 </div>
-            </div>
-        </div>
-    </>
-  )
-})
 
-export default InvoiceLayout
+            </div>
+        </>
+    );
+};
+
+export default InvoiceLayout;

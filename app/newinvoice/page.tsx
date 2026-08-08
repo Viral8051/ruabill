@@ -178,6 +178,7 @@ const NewInvoice = () => {
 
             const finalShippedTo = {
                 clientName : shippedTo.clientName || billedTo.clientName,
+                clientAdress : shippedTo.clientAdress || billedTo.clientAdress,
                 clientCity : shippedTo.clientCity || billedTo.clientCity,
                 clientPincode : shippedTo.clientPincode || billedTo.clientPincode,
                 clientState  : shippedTo.clientState || billedTo.clientState,

@@ -20,23 +20,20 @@
   }
 }
 
+/* =========================================================
+   PRINT / PDF
+   ========================================================= */
+
 @media print {
-  /* Remove browser default margins */
-  /* Disable all scrollbars */
-  * {
-    overflow: visible !important;
+
+  *,
+  *::before,
+  *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    box-sizing: border-box !important;
   }
 
-  /* Specifically fix modal + body */
-  
-  .invoice-model {
-    overflow: visible !important;
-  }
-
-  /* Just in case browser still tries */
-  ::-webkit-scrollbar {
-    display: none;
-  }
   @page {
     size: A4;
     margin: 0;
@@ -44,37 +41,206 @@
 
   html,
   body {
-    margin: 0;
-    padding: 0;
-    width: 210mm;
-    height: 297mm;
+    margin: 0 !important;
+    padding: 0 !important;
+
+    width: 210mm !important;
+    height: 297mm !important;
+    min-height: 297mm !important;
+    max-height: 297mm !important;
+
+    overflow: hidden !important;
   }
 
-  /* Center invoice horizontally */
-  .Invoice-page {
-    margin: 0 auto;
-    box-shadow: none;
+  body {
+    background: white !important;
   }
 
-  /* Hide dashboard / modal background */
-  .dashboard,
+  /* Hide everything except invoice */
+  .dashboard {
+    width: 210mm !important;
+    height: 297mm !important;
+    min-height: 297mm !important;
+    max-height: 297mm !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    overflow: hidden !important;
+
+    background: transparent !important;
+    box-shadow: none !important;
+    border: 0 !important;
+  }
+
+  .container-main {
+    width: 210mm !important;
+    height: 297mm !important;
+    min-height: 297mm !important;
+    max-height: 297mm !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    overflow: hidden !important;
+
+    background: transparent !important;
+    box-shadow: none !important;
+    border: 0 !important;
+  }
+
+  .dashboard-head,
+  .dashboard-table {
+    display: none !important;
+  }
+
   .invoice-model {
-    background: none !important;
+    position: static !important;
+
+    width: 210mm !important;
+    height: 297mm !important;
+    min-height: 297mm !important;
+    max-height: 297mm !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    overflow: hidden !important;
+
+    background: transparent !important;
   }
 
-  .model-close{
-    display: none;
+  .invoice-model .min-h-screen {
+    display: block !important;
+
+    width: 210mm !important;
+    height: 297mm !important;
+    min-height: 297mm !important;
+    max-height: 297mm !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    overflow: hidden !important;
+  }
+
+  .Invoice-Main {
+    width: 210mm !important;
+    height: 297mm !important;
+    min-height: 297mm !important;
+    max-height: 297mm !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    overflow: hidden !important;
+
+    background: white !important;
+  }
+
+  .containerMain {
+    display: block !important;
+
+    width: 210mm !important;
+    height: 297mm !important;
+    min-height: 297mm !important;
+    max-height: 297mm !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    overflow: hidden !important;
+  }
+
+  /*
+    Actual A4 invoice.
+    The JS calculates --invoice-scale according to
+    the actual invoice content height.
+  */
+  .Invoice-page {
+    width: 210mm !important;
+    height: 297mm !important;
+    min-height: 297mm !important;
+    max-height: 297mm !important;
+
+    margin: 0 auto !important;
+    padding: 0 !important;
+
+    overflow: hidden !important;
+
+    background: white !important;
+    box-shadow: none !important;
+
+    page-break-after: avoid !important;
+    page-break-before: avoid !important;
+    page-break-inside: avoid !important;
+
+    break-after: avoid !important;
+    break-before: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /*
+    Scaling happens ONLY during printing.
+    Screen preview stays normal size.
+  */
+  .Invoice-fit-content {
+    transform: scale(var(--invoice-scale, 1)) !important;
+    transform-origin: top center !important;
+
+    width: 100% !important;
+
+    overflow: visible !important;
+  }
+
+  .Invoice-body,
+  .Invoice-Items,
+  .Invoice-other {
+    overflow: visible !important;
+  }
+
+  /*
+    Prevent individual sections/rows from being split.
+  */
+  .Invoice-top-details,
+  .Invoice-client-details,
+  .Invoice-other,
+  .Invoice-other-left,
+  .Invoice-other-right,
+  .Invoice-other-amount,
+  .Invoice-other-bank,
+  .Invoice-other-terms,
+  .Invoice-other-gst,
+  .Invoice-other-net,
+  .Invoice-other-sign {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  tr {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .model-close {
+    display: none !important;
   }
 }
+
+
+/* =========================================================
+   NORMAL SCREEN
+   ========================================================= */
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+   -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
 
-
-.containerMain{
+.containerMain {
   display: flex;
   width: 1280px;
   margin: 0 auto;

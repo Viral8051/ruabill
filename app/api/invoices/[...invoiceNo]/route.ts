@@ -4,33 +4,35 @@ import { NextResponse } from "next/server";
 
 export async function GET(
   req: Request,
-  { params }: { params: Promise<{ invoiceNo: string }> }
+  { params }: { params: Promise<{ invoiceNo: string[] }> }
 ) {
   const { invoiceNo } = await params;
+  const invoiceNoStr = invoiceNo.join("/");
 
   return NextResponse.json({
     message: "GET works",
-    invoiceNo,
+    invoiceNo: invoiceNoStr,
   });
 }
 
 export async function DELETE(
   req: Request,
-  { params }: { params: Promise<{ invoiceNo: string }> }
+  { params }: { params: Promise<{ invoiceNo: string[] }> }
 ) {
-  const { invoiceNo } = await params; // ✅ THIS LINE FIXES EVERYTHING
+  const { invoiceNo } = await params;
+  const invoiceNoStr = invoiceNo.join("/"); // "CT-26", "27-001" -> "CT-26/27-001"
 
   await dbConnect();
 
   const deletedInvoice = await Invoice.findOneAndDelete({
-    "invoiceInfo.invoiceNo": invoiceNo,
+    "invoiceInfo.invoiceNo": invoiceNoStr,
   });
 
-  if(!deletedInvoice) {
+  if (!deletedInvoice) {
     return NextResponse.json(
-        {success: false, message: "Invoice not found"},
-        {status: 404}
-    )
+      { success: false, message: "Invoice not found" },
+      { status: 404 }
+    );
   }
 
   return NextResponse.json({
@@ -38,4 +40,3 @@ export async function DELETE(
     deletedInvoice,
   });
 }
-
