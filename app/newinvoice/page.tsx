@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import Button from '../ui/Button';
 import { useInvoice } from '@/hooks/useInvoice';
+import Link from "next/link";
 
 // datatypes
 type Invoice = {
@@ -266,7 +267,16 @@ useEffect(() => {
             <div className="containerMain">
                 <div className="NewInvoice-inner w-full m-2 flex justify-center mt-5">
                     <form className='NewInvoice__form mt-5 w-full px-2 md:w-[80%] '>
-                        <h2 className='text-center font-bold text-3xl mb-2'>Add Invoice</h2>
+                        <h2 className='text-center font-bold text-3xl mb-2'>Add Invoice  
+                            <span>
+                                <Link
+                                    href="/dashboard"
+                                    className="ml-3 inline-block text-sm font-medium px-4 py-2 rounded-full bg-red-500 text-white hover:bg-red-600 transition-colors"
+                                >
+                                    Go to Dashboard
+                                </Link>
+                            </span>
+                        </h2>
                         <div className="text-lg shadow-[inset_0_10px_38px_-7px_rgba(136,136,136,0.2)] rounded-3xl p-5">
                             {/* Invoice Info */}
                             <div className="grid md:grid-cols-2">
