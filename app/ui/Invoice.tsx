@@ -24,23 +24,24 @@ const InvoiceLayout = (({invoice} : props) => {
                         <div className="flex w-full justify-between">
                             <div className=" Firm-logo w-full flex justify-center items-center flex-1/4">
                                 <div className="">
-                                    <h2>Logo</h2>
+                                    <img src="/CT-Logo.png" alt="CT Logo" />
                                 </div>
                             </div>
                             <div className="w-full flex-2/4">
                                 <div className="Lord-greetings w-full">
-                                    <h2 className='text-red-600 text-sm pb-1 text-center'>||| Shree Hinglaj Maa |||</h2>
+                                    <h2 className='text-red-600 text-sm pb-1 text-center'>||| Shree Aashapura Maa |||</h2>
                                 </div>
                                 <div className="Firm-Name w-full">
-                                    <h1 className='text-center font-semibold text-4xl text-red-600 uppercase'>Rua Textile</h1>
+                                    <h1 className='text-center font-semibold text-4xl text-red-600 uppercase'>Charmi Traders</h1>
                                 </div>
                                 <div className="Firm-Adress w-full py-2">
-                                    <p className='text-center font-bold text-sm'>Laxmi Nivas, Opp. Raghuvir Mandap Services,<br /> Near Sodha School, Jamnagar, 361001.</p>
+                                    <p className='text-center font-bold text-sm'>Laxmi Nivas, Opp. Raghuvir Mandap Services,<br /> Near Sodha School, Ramvadi, Gulabnagar, Jamnagar, 361007.</p>
                                 </div>
                             </div>
                             <div className="Firm-contact w-full flex justify-center items-center flex-1/4">
                                 <div className="Firm-number">
-                                    <p className='font-bold'>9863111119</p>
+                                    <p className='font-bold text-[12px]'><strong>Vinubhai Bhoot :</strong> 9824206710</p>
+                                    <p className='font-bold text-[12px]' ><strong>Viral Bhoot :</strong> 9722930053</p>
                                 </div>
                             </div>
                         </div>
@@ -48,7 +49,7 @@ const InvoiceLayout = (({invoice} : props) => {
                             <p className='font-bold text-sm uppercase'>Tax Invoice</p>        
                         </div>
                         <div className="Invoice-gst p-1">
-                            <p className='uppercase text-sm font-bold'>GSTIN : 24cgqpm8131c1zf</p>
+                            <p className='uppercase text-sm font-bold'>GSTIN : 24AMQBPB1171R1ZQ</p>
                         </div>
                         {/* Invoice Body starts  */}
                         <div className="Invoice-body w-full">
@@ -199,17 +200,19 @@ const InvoiceLayout = (({invoice} : props) => {
                                         <div className="grid grid-cols-10 text-sm font-bold ">
                                             <div className="Invoice-bank-left col-span-3 ">
                                                 <p className='p-1 border-b-2 border-r-2'>Bank Account</p>
+                                                <p className='p-1 border-b-2 border-r-2'>Bank Name</p>
                                                 <p className='p-1 border-r-2'>Bank IFSC</p>
                                             </div>
                                             <div className="Invoice-bank-right w-full col-span-7">
-                                                <p className='p-1 border-b-2'>50200113085929 <span className='pl-6'>HDFC BANK</span></p>
-                                                <p className='p-1'>HDFC0001251 <span className='pl-9'>Jamnagar</span></p>
+                                                <p className='p-1 border-b-2'>006000400000247 </p>
+                                                <p className='p-1 border-b-2'>The Nawanagar Co-Operative Bank Ltd</p>
+                                                <p className='p-1'>TNCB0000006 <span className='pl-9'>Jamnagar</span></p>
                                             </div>
                                         </div>
                                     </div>
                                     <div className="Invoice-other-terms font-bold text-sm border-2 border-t-0">
                                         <h2 className='text-center border-b-2'>Terms and Conditions</h2>
-                                        <ul className='list-disc p-1 pl-5'>
+                                        <ul className='list-disc p-1 pl-5 text-[11px]'>
                                             <li>Goods once sold will not be taken back or exchanged.</li>
                                             <li>Seller is not responsible for any loss or damage of goods in transit.</li>
                                         </ul>
@@ -240,7 +243,7 @@ const InvoiceLayout = (({invoice} : props) => {
                                     </div>
                                     <div className="Invoice-other-sign border-r-2 border-b-2 h-38">
                                         <p className='text-[9px] p-2 text-center'>Certified that the particulars given above are true and correct</p>
-                                        <p className='text-center'>For <span className='text-red-500 font-bold'>RUA TEXTILE</span></p>
+                                        <p className='text-center'>For <span className='text-red-500 font-bold'>Charmi Traders</span></p>
                                         <p className='pt-18 text-center font-bold'>Authorised signatory</p>
                                     </div>
                                 </div>

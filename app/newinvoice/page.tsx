@@ -1,7 +1,6 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import Button from '../ui/Button';
-import Invoice from '../ui/Invoice';
 import { useInvoice } from '@/hooks/useInvoice';
 
 // datatypes
@@ -147,6 +146,26 @@ const NewInvoice = () => {
         const data = await res.json();
         console.log(data);
     }
+
+    // fetch the auto-generated next invoice number (read-only preview)
+    const fetchNextInvoiceNo = async () => {
+        const res = await fetch('/api/invoices/next-number');
+        if (!res.ok) {
+            console.error("Failed to fetch next invoice number");
+            return;
+        }
+        const data = await res.json();
+        if (data.success) {
+            setInvoice(prev => ({
+                ...prev,
+                invoiceInfo: {
+                    ...prev.invoiceInfo,
+                    invoiceNo: data.invoiceNo
+                }
+            }));
+        }
+    }
+
     const handleSaveInvoice = async () => {
         let finalInvoice;
         try{
@@ -169,7 +188,7 @@ const NewInvoice = () => {
                 }
             }
 
-            await fetch('/api/invoices', {
+            const res = await fetch('/api/invoices', {
                 method:'POST',
                 headers: {
                     'Content-Type' : 'application/json',
@@ -177,7 +196,12 @@ const NewInvoice = () => {
                 body: JSON.stringify(finalInvoice)
             })
 
-            addInvoice(finalInvoice);
+            const saved = await res.json();
+
+            // server generates the real invoiceNo - use that in local state
+            const savedInvoice = saved?.data ?? finalInvoice;
+
+            addInvoice(savedInvoice);
 
             // const existingInvoicesJson = localStorage.getItem('invoices');
             // const existingInvoices  = existingInvoicesJson ? JSON.parse(existingInvoicesJson) : [];
@@ -215,6 +239,9 @@ const NewInvoice = () => {
                 invoiceItems : []
             }))
             alert("invoice saved successfully");
+
+            // fetch the next number for the following invoice
+            fetchNextInvoiceNo();
         }
         catch(err){
             console.log("error saving invoice" , err);
@@ -223,6 +250,7 @@ const NewInvoice = () => {
 // // Log when the entire invoice state changes
 useEffect(() => {
   fetchInvoice()
+  fetchNextInvoiceNo()
 }, []); // Watch the entire object
     
   return (
@@ -238,12 +266,13 @@ useEffect(() => {
                                 <div className="Invoice-no">
                                     <label htmlFor="Invoice-no">Invoice No. :</label>
                                     <input 
-                                        type="number" 
+                                        type="text" 
                                         name="Invoice-Number" 
                                         id="Invoice-no" 
-                                        className='bg-white ml-2 rounded-2xl text-black focus-within:outline-0 p-1'
+                                        readOnly
+                                        disabled
+                                        className='bg-white ml-2 rounded-2xl text-black opacity-70 cursor-not-allowed focus-within:outline-0 p-1'
                                         value={invoice.invoiceInfo.invoiceNo}
-                                        onChange={(e) => handleInput('invoiceInfo', '','invoiceNo', e.target.value)}
                                     />
                                 </div>
                                 <div className="Invoice-date pt-2">
