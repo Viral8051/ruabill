@@ -18,6 +18,14 @@ const Dashboard = () => {
     const [model, setModel] = useState(false);
     const [client, setClient] = useState("");
 
+    const formatDate = (date: string) => {
+    if (!date) return '';
+
+    const [year, month, day] = date.split('-');
+
+    return `${day}-${month}-${year.slice(-2)}`;
+    };
+
     // preview invoice
     const handlePreview = (invoice: Invoice) => {
         setModel(true);
@@ -173,7 +181,7 @@ const Dashboard = () => {
                                                 </td>
 
                                                 <td className="py-5">
-                                                    {invoice.invoiceInfo.invoiceDate}
+                                                    {formatDate(invoice.invoiceInfo.invoiceDate)}
                                                 </td>
 
                                                 <td className="py-5">
