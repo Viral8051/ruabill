@@ -89,6 +89,9 @@ const NewInvoice = () => {
     const {addInvoice} = useInvoice();
     // States
 
+
+    const formatDate = (date: string) => { if (!date) return ''; const [year, month, day] = date.split('-'); return `${day}-${month}-${year.slice(-2)}`; };
+    
     const handleInput = (section: 'invoiceInfo' | 'invoiceClient' | 'invoiceItems',
         subSection:'billedTo' | 'shippedTo' | '',
         field: string, value:string | number ) => { 
@@ -299,7 +302,7 @@ useEffect(() => {
                                         name="Invoice-date" 
                                         id="Invoice-date" 
                                         className='bg-white ml-2 rounded-2xl text-black focus-within:outline-0 p-1 '
-                                        value={invoice.invoiceInfo.invoiceDate}
+                                        value={formatDate(invoice.invoiceInfo.invoiceDate)}
                                         onChange={(e) => handleInput('invoiceInfo','', 'invoiceDate', e.target.value)}
                                     />
                                 </div>
@@ -365,7 +368,7 @@ useEffect(() => {
                                         name="Invoice-date-of-supply" 
                                         id="Invoice-date-of-supply" 
                                         className='bg-white ml-2 rounded-2xl text-black focus-within:outline-0 p-1 '
-                                        value={invoice.invoiceInfo.invoiceSupplyDate}
+                                        value={formatDate(invoice.invoiceInfo.invoiceSupplyDate)}
                                         onChange={(e) => handleInput('invoiceInfo','', 'invoiceSupplyDate', e.target.value)}
                                     />
                                 </div>
