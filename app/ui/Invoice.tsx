@@ -110,6 +110,12 @@ const InvoiceLayout = ({ invoice }: props) => {
 
     const max_rows = 10;
 
+    const formatDate = (date: string) => {
+        if (!date) return '';
+        const [year, month, day] = date.split('-');
+        return `${day}-${month}-${year.slice(-2)}`;
+    };
+
     const emptyRows = Math.max(
         0,
         max_rows - invoice.invoiceItems.length
@@ -397,7 +403,7 @@ const InvoiceLayout = ({ invoice }: props) => {
                                         <div className="Invoice-date">
 
                                             <p className="text-sm font-bold">
-                                                Invoice Date : {invoice.invoiceInfo.invoiceDate}
+                                                Invoice Date : {formatDate(invoice.invoiceInfo.invoiceDate)}
                                             </p>
 
                                         </div>
@@ -415,7 +421,7 @@ const InvoiceLayout = ({ invoice }: props) => {
                                         <div className="Date-supply">
 
                                             <p className="text-sm font-bold">
-                                                Date of Supply: {invoice.invoiceInfo.invoiceSupplyDate}
+                                                Date of Supply: {formatDate(invoice.invoiceInfo.invoiceSupplyDate)}
                                             </p>
 
                                         </div>
