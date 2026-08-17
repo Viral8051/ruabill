@@ -127,13 +127,14 @@ const InvoiceLayout = ({ invoice }: props) => {
         0
     );
 
-    const cgst = Math.round(
-        (totalAmount * 2.5) / 100
+    const totalGst = invoice.invoiceItems.reduce(
+        (sum, item) => sum + (item.total * (item.itemGstRate || 0)) / 100,
+        0
     );
 
-    const sgst = Math.round(
-        (totalAmount * 2.5) / 100
-    );
+    const cgst = Math.round(totalGst / 2);
+
+    const sgst = Math.round(totalGst / 2);
 
     const netAmount =
         totalAmount +
@@ -337,7 +338,7 @@ const InvoiceLayout = ({ invoice }: props) => {
                                 <div className="Invoice-gst p-1">
 
                                     <p className="uppercase text-sm font-bold">
-                                        GSTIN : 24AMQBPB1171R1ZQ
+                                        GSTIN : 24AMQPB1171R1ZQ
                                     </p>
 
                                 </div>
@@ -679,7 +680,7 @@ const InvoiceLayout = ({ invoice }: props) => {
                                                         </td>
 
                                                         <td className="align-top">
-                                                            520811
+                                                            {item.itemHsn}
                                                         </td>
 
                                                         <td className="align-top">
@@ -897,11 +898,11 @@ const InvoiceLayout = ({ invoice }: props) => {
                                             <div className="col-span-2">
 
                                                 <p className="p-1 text-center border-r-2 border-b-2">
-                                                    2.5%
+                                                    {totalAmount ? `${(totalGst / 2 / totalAmount * 100).toFixed(1)}%` : '-'}
                                                 </p>
 
                                                 <p className="p-1 text-center border-r-2">
-                                                    2.5%
+                                                    {totalAmount ? `${(totalGst / 2 / totalAmount * 100).toFixed(1)}%` : '-'}
                                                 </p>
 
                                             </div>

@@ -2,6 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import Button from '../ui/Button';
 import { useInvoice } from '@/hooks/useInvoice';
+import { useClient } from '@/hooks/useClient';
+import { Client } from '@/context/client/clientReducer';
 import Link from "next/link";
 
 // datatypes
@@ -40,6 +42,8 @@ type Invoice = {
 
 type Items = {
     itemPerticular : string,
+    itemHsn: string,
+    itemGstRate: number,
     itemPieces: number,
     itemPrice: number,
     total: number
@@ -81,14 +85,17 @@ const NewInvoice = () => {
     
     const [item, setItems] = useState<Items> ({
     itemPerticular : '',
+    itemHsn: '',
+    itemGstRate: 0,
     itemPieces: 0,
     itemPrice: 0,
     total: 0
     });
 
     const {addInvoice} = useInvoice();
+    const {clients, setClients} = useClient();
+    const [selectedClientId, setSelectedClientId] = useState<string>('');
     // States
-
 
     
     const handleInput = (section: 'invoiceInfo' | 'invoiceClient' | 'invoiceItems',
@@ -137,6 +144,8 @@ const NewInvoice = () => {
 
         setItems({
             itemPerticular: '',
+            itemHsn: '',
+            itemGstRate: 0,
             itemPieces: 0,
             itemPrice: 0,
             total: 0
@@ -152,6 +161,44 @@ const NewInvoice = () => {
 
         const data = await res.json();
         console.log(data);
+    }
+
+    // fetch saved clients for the "select client" dropdown
+    const fetchClients = async () => {
+        const res = await fetch('/api/clients');
+        if (!res.ok) {
+            console.error("Failed to fetch clients");
+            return;
+        }
+        const data = await res.json();
+        if (data.success) {
+            setClients(data.data);
+        }
+    }
+
+    // when a client is picked from the dropdown, auto-fill the Billed To fields
+    const handleSelectClient = (clientId: string) => {
+        setSelectedClientId(clientId);
+
+        if (!clientId) return;
+
+        const selected = clients.find((c: Client) => c._id === clientId);
+        if (!selected) return;
+
+        setInvoice(prev => ({
+            ...prev,
+            invoiceClient: {
+                ...prev.invoiceClient,
+                billedTo: {
+                    clientName: selected.clientName,
+                    clientAdress: selected.clientAdress,
+                    clientCity: selected.clientCity,
+                    clientPincode: selected.clientPincode,
+                    clientState: selected.clientState,
+                    clientGst: selected.clientGst,
+                }
+            }
+        }))
     }
 
     // fetch the auto-generated next invoice number (read-only preview)
@@ -248,6 +295,7 @@ const NewInvoice = () => {
                 },
                 invoiceItems : []
             }))
+            setSelectedClientId('');
             alert("invoice saved successfully");
 
             // fetch the next number for the following invoice
@@ -261,6 +309,7 @@ const NewInvoice = () => {
 useEffect(() => {
   fetchInvoice()
   fetchNextInvoiceNo()
+  fetchClients()
 }, []); // Watch the entire object
     
   return (
@@ -276,6 +325,12 @@ useEffect(() => {
                                     className="ml-3 inline-block text-sm font-medium px-4 py-2 rounded-full bg-red-500 text-white hover:bg-red-600 transition-colors"
                                 >
                                     Go to Dashboard
+                                </Link>
+                                <Link
+                                    href="/clients"
+                                    className="ml-3 inline-block text-sm font-medium px-4 py-2 rounded-full bg-red-500 text-white hover:bg-red-600 transition-colors"
+                                >
+                                    Manage Clients
                                 </Link>
                             </span>
                         </h2>
@@ -379,6 +434,25 @@ useEffect(() => {
                                 {/* Invoice Client- Billed To */}
                                 <div className="">
                                     <h2 className='py-5 text-2xl font-bold text-red-500'>Detail of Recevier- Billed To</h2>
+
+                                    {/* Select saved client - auto fills the fields below */}
+                                    <div className="Select-client pb-3">
+                                        <label htmlFor="Select-client">Select Client:</label>
+                                        <select
+                                            id="Select-client"
+                                            className='bg-white ml-2 rounded-2xl text-black focus-within:outline-0 p-1'
+                                            value={selectedClientId}
+                                            onChange={(e) => handleSelectClient(e.target.value)}
+                                        >
+                                            <option value="">-- Choose Saved Client --</option>
+                                            {clients.map((c: Client) => (
+                                                <option key={c._id} value={c._id}>
+                                                    {c.clientName}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+
                                     <div className="Clinet-name">
                                         <label htmlFor="Clinet-name">Client Name:</label>
                                         <input 
@@ -539,6 +613,28 @@ useEffect(() => {
                                             onChange={(e) => handleItems('itemPerticular' , e.target.value)}
                                         />
                                     </div>
+                                    <div className="perticular-hsn pt-2">
+                                        <label htmlFor="perticular-hsn">HSN Code:</label>
+                                        <input 
+                                            type='text'
+                                            name="perticular-hsn" 
+                                            id="perticular-hsn" 
+                                            className='bg-white ml-2 rounded-2xl text-black focus-within:outline-0 p-1 '
+                                            value={item.itemHsn}
+                                            onChange={(e) => handleItems('itemHsn' , e.target.value)}
+                                        />
+                                    </div>
+                                    <div className="perticular-gst pt-2">
+                                        <label htmlFor="perticular-gst">GST Rate (%):</label>
+                                        <input 
+                                            type='number'
+                                            name="perticular-gst" 
+                                            id="perticular-gst" 
+                                            className='bg-white ml-2 rounded-2xl text-black focus-within:outline-0 p-1 '
+                                            value={item.itemGstRate}
+                                            onChange={(e) => handleItems('itemGstRate' , Number(e.target.value))}
+                                        />
+                                    </div>
                                     <div className="perticular-piece pt-2">
                                         <label htmlFor="perticular-piece">Pieces</label>
                                         <input 
@@ -547,7 +643,7 @@ useEffect(() => {
                                             id="perticular-piece" 
                                             className='bg-white ml-2 rounded-2xl text-black focus-within:outline-0 p-1 '
                                             value={item.itemPieces}
-                                            onChange={(e) => handleItems('itemPieces' , e.target.value)}
+                                            onChange={(e) => handleItems('itemPieces' , Number(e.target.value))}
                                         />
                                     </div>
                                     <div className="perticular-price pt-2">
@@ -558,7 +654,7 @@ useEffect(() => {
                                             id="perticular-price" 
                                             className='bg-white ml-2 rounded-2xl text-black focus-within:outline-0 p-1 '
                                             value={item.itemPrice}
-                                            onChange={(e) => handleItems('itemPrice' , e.target.value)}
+                                            onChange={(e) => handleItems('itemPrice' , Number(e.target.value))}
                                         />
                                     </div>
                                     <div className="pt-2">
@@ -572,7 +668,9 @@ useEffect(() => {
                                     <table className='w-full'>
                                         <thead className='text-left border-b border-[#212222]'>
                                             <tr>
-                                                <th colSpan={6}>Perticulars</th>
+                                                <th colSpan={4}>Perticulars</th>
+                                                <th colSpan={2}>HSN</th>
+                                                <th colSpan={1}>GST%</th>
                                                 <th colSpan={2}>Pieces</th>
                                                 <th colSpan={2}>Price</th>
                                             </tr>
@@ -580,7 +678,9 @@ useEffect(() => {
                                         <tbody>
                                             {invoice.invoiceItems.map((savedItem, index) => (
                                                 <tr key={index}>
-                                                    <td colSpan={6} className='pt-1'>{savedItem.itemPerticular}</td>
+                                                    <td colSpan={4} className='pt-1'>{savedItem.itemPerticular}</td>
+                                                    <td colSpan={2} className='pt-1'>{savedItem.itemHsn}</td>
+                                                    <td colSpan={1} className='pt-1'>{savedItem.itemGstRate}</td>
                                                     <td colSpan={2} className='pt-1'>{savedItem.itemPieces}</td>
                                                     <td colSpan={2} className='pt-1'>{savedItem.itemPrice}</td>
                                                 </tr>

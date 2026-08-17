@@ -2,6 +2,8 @@ import mongoose from "mongoose";
 
 const ItemSchema = new mongoose.Schema ({
     itemPerticular : String,
+    itemHsn: String,
+    itemGstRate: Number,
     itemPieces: Number,
     itemPrice: Number,
     total: Number

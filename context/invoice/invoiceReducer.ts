@@ -1,5 +1,7 @@
 export type InvoiceItem = {
     itemPerticular : string,
+    itemHsn: string,
+    itemGstRate: number,
     itemPieces: number,
     itemPrice: number,
     total: number

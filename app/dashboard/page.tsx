@@ -104,6 +104,11 @@ const Dashboard = () => {
                                     Add-Invoice
                                 </Button>
                             </Link>
+                            <Link href="/clients" className="ml-2">
+                                <Button className="hover:shadow-[0px_0px_15px_-3px_rgba(255,255,255,0.8)] hover:bg-red-500">
+                                    Manage Clients 
+                                </Button>
+                            </Link>
 
                             <input
                                 type="text"
