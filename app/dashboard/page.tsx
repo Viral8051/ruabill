@@ -80,7 +80,7 @@ const Dashboard = () => {
     return (
         <>
             <section className="dashboard h-svh p-5 relative">
-                <div className="container-main shadow-[0px_0px_22px_-15px_rgba(136,136,136,1)] rounded-3xl border-[var(--ternary-color)] p-5">
+                <div className="container-main shadow-[0px_0px_22px_-15px_rgba(136,136,136,1)] rounded-3xl border-(--ternary-color) p-5">
 
                     <div className="dashboard-head w-full mt-5 text-center">
                         <div className="flex justify-between">
